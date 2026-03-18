@@ -1,0 +1,7 @@
+interface:
+  display_name: "Experiment Analysis"
+  short_description: "Results, captions, charts, model choice"
+  default_prompt: "Use $experiment-analysis to analyze results, suggest charts, draft captions, or choose a model."
+
+policy:
+  allow_implicit_invocation: true
