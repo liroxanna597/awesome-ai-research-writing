@@ -1,0 +1,7 @@
+interface:
+  display_name: "Paper Translation"
+  short_description: "Academic translation and rewrite flows"
+  default_prompt: "Use $paper-translation to translate or rewrite academic text between Chinese and English."
+
+policy:
+  allow_implicit_invocation: true

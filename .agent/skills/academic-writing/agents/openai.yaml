@@ -1,0 +1,7 @@
+interface:
+  display_name: "Academic Writing"
+  short_description: "Research writing prompts and workflows"
+  default_prompt: "Use $academic-writing to help draft, polish, translate, or review academic writing with this repository's workflows."
+
+policy:
+  allow_implicit_invocation: true

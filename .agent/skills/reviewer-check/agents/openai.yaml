@@ -1,0 +1,7 @@
+interface:
+  display_name: "Reviewer Check"
+  short_description: "Logic, structure, and reviewer critique"
+  default_prompt: "Use $reviewer-check to review academic writing for logic, structure, and reviewer-facing weaknesses."
+
+policy:
+  allow_implicit_invocation: true
