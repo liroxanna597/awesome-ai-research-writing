@@ -858,3 +858,21 @@ Skills 安装到 `.claude/skills/` 后，Cursor 启动时会自动发现并提�
 | 对 Word 稿做修订建议 | docx | 已写好的 .docx 论文或审稿意见 | 「按 redlining 流程，帮我在文档里标出需要改的几处」「把这段改成 tracked changes：原文删除、新文插入」 | 带修订痕迹的 .docx（仅标记改动处，便于作者接受/拒绝） |
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Leey21/awesome-ai-research-writing&type=Date)](https://star-history.com/#Leey21/awesome-ai-research-writing&Date)
+
+## OpenSkills setup for this repo
+
+Use universal mode so skills are available to agents that read `AGENTS.md`:
+
+```bash
+./scripts/setup-openskills.sh anthropics/skills
+```
+
+Custom sources (examples):
+
+```bash
+npx openskills install your-org/your-skills --universal -y
+npx openskills install git@github.com:your-org/private-skills.git --universal -y
+npx openskills sync -y
+```
+
+> Requirements: Node.js 20.6+, Git, and network access to npm/GitHub.
