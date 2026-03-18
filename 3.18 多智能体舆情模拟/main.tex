@@ -1,0 +1,36 @@
+% Main manuscript entry point for this paper workspace.
+% Write each chapter under sections/ and compile this file.
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+
+\graphicspath{{figures/}}
+
+\title{Time-Aware Multi-Agent Public Opinion Simulation for Public Emergencies}
+\author{Author information to be added}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/experiments}
+\input{sections/results_analysis}
+\input{sections/conclusion}
+
+\bibliographystyle{plainnat}
+\bibliography{refs/references}
+
+\end{document}
