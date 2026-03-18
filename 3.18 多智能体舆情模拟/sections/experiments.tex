@@ -12,7 +12,9 @@ We select three real events for validation: the China Eastern MU5735 crash, the 
 
 To keep the three research questions comparable, we adopt a \emph{fixed base parameters, single-mechanism switch} strategy. Specifically, we keep the time horizon, user scale, event nodes, and baseline behavioral parameters unchanged, and vary only the mechanism directly related to the target question, thereby reducing interpretive confounding caused by multiple moving variables.
 
-For RQ1, the core comparison is between a condition without official publishers and a condition with fixed official publishers plus multiple event-progress signals. For RQ2, the core comparison is between turning \texttt{enable\_reflection} off and on. For RQ3, the core comparison focuses on user changes before and after official releases. All three cases use the same experimental grouping design to maintain cross-case comparability. We consider five groups: \textbf{G1} (standard, 3 days, official publisher, reflection, 100 agents), \textbf{G2} (extended, 7 days, official publisher, reflection, 100 agents), \textbf{G3} (publisher ablation, 3 days, no publisher, reflection, 100 agents), \textbf{G4} (reflection ablation, 3 days, publisher, no reflection, 100 agents), and \textbf{G1-300} (scale extension, 3 days, publisher, reflection, 300 agents).
+For RQ1, the core comparison is between a condition without official publishers and a condition with fixed official publishers plus multiple event-progress signals. For RQ2, the core comparison is between turning \texttt{enable\_reflection} off and on. For RQ3, the core comparison focuses on user changes before and after official releases. All three cases use the same experimental grouping design to maintain cross-case comparability. Table~\ref{tab:experiment_groups} summarizes the five experimental groups used in this study.
+
+\input{tables/tab_experiment_groups}
 
 \subsection{Evaluation Metrics}
 
