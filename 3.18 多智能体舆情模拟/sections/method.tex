@@ -1,0 +1,35 @@
+\section{System Model Design}
+
+This paper develops a time-aware multi-agent public opinion simulation system for public emergencies. The framework is designed to model three tightly coupled mechanisms within a unified loop: the temporal structure of event evolution, the cognitive and behavioral dynamics of individual users, and the information environment of the social media platform. The system uses continuous-time scheduling as its temporal backbone, LLM-driven user agents as behavioral actors, and a centralized social-media environment as the interaction space. Through official publisher injection, event-progress activation, cognitive reflection updates, and state recording and rollback, the framework organizes user expression, emotional change, information exposure, and event progression into a simulation loop that is verifiable, ablatable, and replayable. In this sense, the framework is not only intended to generate plausible comments, but also to reproduce how public opinion evolves from outbreak to decline in real public emergencies and to support mechanism validation and counterfactual experimentation.
+
+\subsection{Time-Aware Scheduling Mechanism}
+
+The system is organized around a continuous timeline and an event-priority queue to simulate the asynchronous participation process observed in real social media events. Instead of advancing all agents in synchronized rounds, the framework treats each agent's next execution time as the core scheduling unit, allowing users to enter, browse, interact, and leave at different moments. This design more closely resembles the non-synchronous online state of real social media and provides an operational basis for inserting stage-specific events, increasing interaction density during outbreak periods, and sparsifying activity during decline periods.
+
+Each agent enters the system according to a probability distribution \(P(t)\), which follows an initial rise and gradual decay pattern to reflect the natural life cycle of public attention:
+\[
+P(t) \propto t^{\alpha} \cdot e^{-\beta t}, \quad t \ge 0.
+\]
+Here, \(\alpha\) controls the growth rate and \(\beta\) controls the decay rate. The event-priority queue guarantees temporal consistency: if Agent~A posts a comment at time \(t\), then Agent~B entering the system at \(t+\Delta t\) may observe that comment. In this way, the framework reproduces the basic temporal pattern of outbreak and decline in real social-media discussions on a unified timeline.
+
+At a higher level, the temporal structure is further shaped by event-progress nodes and activity-control mechanisms. The initial incident triggers the first round of attention concentration, while newly identified key developments can reactivate participation density over subsequent time windows. As a result, time is not merely a tool for execution ordering; it becomes a core mechanism variable that determines the rhythm of information exposure and the distribution of behavioral opportunities.
+
+\subsection{Individual Cognitive-Behavioral Simulation}
+
+Each agent is assigned relatively stable demographic attributes and role backgrounds, while maintaining dynamic psychological variables during simulation. The framework tracks, in particular, emotion intensity \(e \in [0,1]\), social confidence \(c \in [0,1]\), and sentiment polarity \(s \in [-1,1]\). Within each interaction cycle, an agent proceeds through the following stages.
+
+First, the agent perceives a subset of visible comments through an LLM-generated browsing impression. Second, based on its current psychological state and perceived information, the agent decides whether to like, comment, repost, or leave the platform, where comments and replies are treated as substantive actions with explicit semantic expression. Third, if the agent decides to comment, the LLM generates semantically rich content conditioned on the agent profile and accumulated experience. Fourth, after acting, the system invokes a cognitive reflection step in which the LLM updates the agent's psychological variables on the basis of accumulated experience.
+
+This process forms a closed loop of information exposure, behavioral choice, and psychological feedback, which resembles the metacognitive process of human public discussion. It is also consistent with the ``record--retrieve--reflect--plan'' logic emphasized in generative agents. The reflection module therefore allows agents to evaluate and adjust their own cognitive and emotional states through historical interaction. In parallel, generated comments are scored for sentiment polarity to support subsequent analysis and mechanism validation.
+
+\subsection{Environmental Simulation Mechanism}
+
+The system adopts a centralized social-media environment that maintains an event topic, a list of comments, and threaded reply structures. The information visible to a user at any given moment is not the entire environment, but a filtered and ranked subset. Consequently, the design of information structures directly affects both content generation and the subsequent interaction chain.
+
+At the same time, the environment layer is responsible for injecting event developments and carrying official releases. Official publishers post authoritative information at predefined time points. Unlike ordinary agents, official publishers follow pre-extracted content and schedules derived from the real event timeline. The number and content of official-release events are configured separately for each case so as to reflect actual intervention patterns in real emergencies.
+
+Beyond fixed publishers, the framework also includes an intelligent opinion-environment assessment module and a pruning mechanism to identify major developments and activate new high-attention stages. In other words, the environment does not merely receive individual behaviors passively; it also reacts to event-content changes by adjusting participation density, thereby supporting both short-term bursts and long-tail processes. Through this design, event progression, content ordering, and user behavior form a closed feedback loop.
+
+\subsection{Recording and Rollback Mechanism}
+
+To support mechanism validation rather than only single-run generation, the system includes persistent logging and state rollback capabilities. It records comment content, action time, emotional variation, and aggregated statistics, and can restore the simulation state at specified time points to continue counterfactual experiments under alternative conditions. This mechanism also makes it possible to trace specific user groups, key nodes, or localized variable changes in a more fine-grained manner.

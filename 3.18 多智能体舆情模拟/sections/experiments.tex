@@ -1,0 +1,21 @@
+\section{Experiments}
+
+\subsection{Research Questions}
+
+The experiments are designed to answer three research questions. \textbf{RQ1} asks whether the proposed framework can simulate public-opinion trajectories more effectively than related settings, especially whether adding fixed official publishers and multiple event-progress signals produces trajectories closer to real data than the condition without official intervention. \textbf{RQ2} asks whether the reflection-update module significantly affects emotion, social confidence, and the stability of public-opinion trends. \textbf{RQ3} asks how users respond to official-release events across different crisis stages and what role these events play in shaping the overall trajectory.
+
+\subsection{Data Sources}
+
+We select three real events for validation: the China Eastern MU5735 crash, the Cathay Pacific service-discrimination incident, and the Guangzhou BMW crash incident. Real-world data are constructed from social-media texts and timestamps and are subsequently aggregated at a unified temporal granularity for external alignment with simulation outputs. Because the three events differ in duration, stage structure, and media salience, cross-event repeated validation allows us to examine whether the mechanism effects remain stable across event types.
+
+\subsection{Experimental Conditions and Parameter Settings}
+
+To keep the three research questions comparable, we adopt a \emph{fixed base parameters, single-mechanism switch} strategy. Specifically, we keep the time horizon, user scale, event nodes, and baseline behavioral parameters unchanged, and vary only the mechanism directly related to the target question, thereby reducing interpretive confounding caused by multiple moving variables.
+
+For RQ1, the core comparison is between a condition without official publishers and a condition with fixed official publishers plus multiple event-progress signals. For RQ2, the core comparison is between turning \texttt{enable\_reflection} off and on. For RQ3, the core comparison focuses on user changes before and after official releases. All three cases use the same experimental grouping design to maintain cross-case comparability. Table~\ref{tab:experiment_groups} summarizes the five experimental groups used in this study.
+
+\input{tables/tab_experiment_groups}
+
+\subsection{Evaluation Metrics}
+
+Following the metrics used in prior studies such as Mou et al. and Liu et al., we evaluate consistency between simulation outputs and real data from the perspectives of statistical level, temporal stability, trend alignment, and shape similarity. Four metrics are used. First, \(\Delta\)Bias measures the overall level deviation between simulated and real sentiment series, defined as \(\Delta\mathrm{Bias} = |\mathrm{mean}(Y) - \mathrm{mean}(X)|\), where \(Y\) denotes the simulated hourly sentiment series and \(X\) denotes the real series. Second, \(\Delta\)Div measures the variance of the hourly differences, \(\Delta\mathrm{Div} = \mathrm{Var}(Y_i - X_i)\), and evaluates temporal stability of the mismatch. Third, Pearson correlation coefficient \(\mathrm{Corr}\) evaluates trend consistency between simulated and real trajectories. Fourth, \(\mathrm{DTW}_{\mathrm{norm}}\) measures rhythm and shape similarity by first applying min--max normalization and then computing the Dynamic Time Warping distance divided by \(\max(\mathrm{len}(X), \mathrm{len}(Y))\).

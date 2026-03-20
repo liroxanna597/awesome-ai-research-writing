@@ -1,0 +1,194 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\graphicspath{{figures/}}
+\onehalfspacing
+
+\title{Time-Aware Multi-Agent Public Opinion Simulation for Public Emergencies}
+\author{Author information to be added}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Public emergencies trigger rapid, emotionally charged, and highly dynamic discussions on social media, making the modeling of online public opinion an important problem for crisis communication and governance. Existing large language model (LLM)-driven multi-agent simulation studies have substantially improved the realism of generated interactions, yet most prior work remains centered on rumor diffusion, adversarial manipulation, or other abnormal-information settings. In addition, current frameworks often rely on fixed-round interaction, provide limited treatment of official information intervention, and offer insufficient cross-event validation of mechanism-level contributions. To address these limitations, this paper presents a time-aware LLM-driven multi-agent public opinion simulation framework for public emergencies. The framework integrates continuous-time scheduling, official publisher injection, and a cognitive reflection module so that user participation, information exposure, and emotional updating can evolve in a temporally grounded and behaviorally interpretable manner. We evaluate the framework on three real cases---the 2022 China Eastern MU5735 crash, the 2023 Guangzhou BMW crash incident, and the 2023 Cathay Pacific discrimination incident---under multiple experimental settings and ablations. Evaluation is conducted with four quantitative indicators, namely $\Delta\mathrm{Bias}$, $\Delta\mathrm{Div}$, Pearson correlation, and normalized dynamic time warping. The results show that the proposed framework can stably recover coarse temporal patterns across heterogeneous events, that official information release and reflection produce distinct but case-dependent effects, and that simulation quality generally improves with increased agent scale. Overall, the study reframes LLM-based public opinion simulation as a mechanism-oriented research instrument for crisis analysis, rather than merely a text-generation pipeline, and offers an empirical basis for future counterfactual policy experiments.
+\end{abstract}
+
+\section{Introduction}
+Public emergencies rapidly transform social media into a primary arena for information diffusion, emotional expression, and collective interpretation. Once a crisis emerges, online discussion seldom evolves as a simple linear process. Instead, public opinion typically moves through multiple stages---initial outbreak, clarification, renewed activation, and gradual decline---while being shaped by interactions among user cognition, official communication, and platform-level exposure mechanisms. For this reason, understanding the dynamics of public opinion is not only a descriptive task, but also a practical requirement for effective crisis governance and public communication.
+
+Traditional computational studies of public opinion and diffusion have largely relied on mathematical or agent-based abstractions. Classical approaches such as epidemic diffusion models, the DeGroot consensus model, and bounded-confidence models capture important macro-level regularities, including contagion speed, convergence behavior, and structural polarization. However, these models usually represent opinions as low-dimensional numerical states and therefore cannot adequately capture how real users interpret information, express emotion, revise judgments, and respond linguistically to unfolding events. As large language models have matured, multi-agent social simulation has gained a new level of semantic realism. LLM-driven agents can generate richer textual behavior, maintain role-consistent interaction patterns, and respond more flexibly to complex situational context, thereby creating new opportunities for public-opinion simulation.
+
+Despite this progress, the current literature still exhibits several limitations. First, many existing studies are designed around rumor propagation, manipulation attacks, or other adversarial environments. Such settings are important, but they do not fully represent the communication structure of real public emergencies, in which official announcements, evolving event milestones, and public trust play central roles. Second, a large share of prior systems adopts fixed-round interaction, which makes it difficult to reflect the asynchronous participation rhythms commonly observed on social media platforms. Third, although some studies demonstrate plausible outputs, they often do not isolate the contributions of key mechanisms through carefully structured ablation experiments. Finally, many reported results are based on a single case, making it difficult to assess whether the identified mechanisms generalize across crises with different emotional intensity, duration, and institutional response patterns.
+
+This study addresses these gaps by developing a time-aware multi-agent public opinion simulation framework tailored to public emergencies. The central idea is that realistic simulation requires not only expressive agents, but also a temporally grounded environment and explicit modeling of institutional intervention. Accordingly, the proposed framework combines three design choices: continuous-time scheduling, official publisher injection, and a cognitive reflection mechanism. These components enable the system to represent asynchronous participation, the timing and content of official releases, and agent-level updating of emotion and judgment after exposure to new information.
+
+The contributions of this paper are threefold. First, we propose a time-aware simulation architecture that unifies event scheduling, user interaction, and official communication within the same social-media environment. Second, we conduct systematic ablation experiments to clarify the independent contributions of official publishers and the reflection module. Third, we perform cross-case validation on three real public emergencies, allowing us to examine how simulation behavior varies across crisis types rather than relying on a single illustrative example.
+
+The remainder of the paper is organized as follows. Section~2 reviews prior work on agent-based social simulation, LLM-driven multi-agent systems, and reflection mechanisms. Section~3 presents the proposed framework. Section~4 introduces the experimental design, data, and evaluation metrics. Section~5 reports the empirical results and interprets the main findings. Section~6 concludes the paper and outlines future directions.
+
+\section{Related Work}
+
+\subsection{Agent-Based Social Network Simulation}
+Research on social systems has progressively moved from static structural analysis to dynamic process modeling, and agent-based modeling (ABM) has become an important paradigm for examining how local interactions generate collective outcomes~\citep{li2026abm, gilbert2008agent, wang2025abm}. In a typical ABM framework, agents act within an environment according to explicit interaction rules, and macro-level patterns emerge from repeated micro-level behavior. Earlier studies have used ABM together with epidemic and opinion-dynamics models to simulate epidemic spread, consensus formation, panic buying, and other forms of collective response~\citep{wu2024epidemic, alatas2017opinion, fan2024panic}. These approaches are valuable for capturing broad diffusion trajectories and the role of network structure.
+
+At the same time, traditional ABM approaches remain constrained by simplified state transitions and hand-crafted decision rules. They are therefore less capable of representing the full cognitive sequence through which a user observes information, interprets meaning, decides whether to respond, and then re-enters the discussion under altered emotional conditions. In the context of public emergencies, this limitation is particularly consequential because public opinion is shaped not only by exposure and contagion, but also by narrative framing, reinterpretation, moral judgment, and emotional regulation. These considerations motivate the integration of richer semantic modeling into agent-based simulation.
+
+\subsection{LLM-Driven Multi-Agent Social Simulation}
+The emergence of LLMs has significantly expanded the expressive capacity of multi-agent simulation. Generative Agents~\citep{park2023generative} demonstrated that language-model-based agents can maintain memory, conduct conversations, and update plans in a way that resembles coherent social behavior. Subsequent work has extended this direction to large-scale social simulation, information diffusion, and collective behavior modeling~\citep{mou2024socialmovement, yang2024oasis, gao2023s3, piao2025agentsociety}. In parallel, recent systems have explored rumor propagation and adversarial topic manipulation under time-aware settings~\citep{liu2025rumorsphere, zhang2024trendsim}.
+
+These studies provide strong evidence that LLM-based agents can improve the realism of simulated social interaction. However, existing frameworks still tend to emphasize abnormal diffusion scenarios, adversarial attacks, or benchmark-style simulation tasks. In real public emergencies, official statements, institutional credibility, event progression, and the timing of new developments often exert decisive influence on collective interpretation. Yet these variables remain under-modeled in much of the current literature. As a result, there is still a need for frameworks that connect LLM-driven agents with the temporal and institutional structure of real crisis communication.
+
+\subsection{Reflection Mechanisms in LLM Agents}
+Reflection is increasingly recognized as a core capability in LLM-agent systems. Prior work has shown that reflection enables agents to synthesize experience, revise intermediate judgments, and improve subsequent behavior~\citep{park2023generative, yao2023react, shinn2023reflexion}. In many applications, the primary goal of reflection is to improve problem solving, planning, or tool use. However, in public-opinion simulation, the function of reflection is broader. The objective is not merely to complete a task more accurately, but to model how users revise attitudes, regulate emotional intensity, and reinterpret events after encountering new information and social feedback.
+
+Related adaptive-feedback ideas also appear in earlier work on coupled diffusion and awareness dynamics, where individuals alter behavior on the basis of risk perception or prior exposure~\citep{funk2009awareness, granell2013awareness}. Although these models do not implement natural-language reflection, they share the same core logic of using historical experience to update future response. LLM-based reflection extends that logic from numerical state revision to semantic-level reinterpretation. This makes it particularly relevant for public-emergency scenarios, in which users do not merely change state; they explain, justify, and emotionally frame their reactions in language.
+
+Taken together, the literature suggests that three research streams are highly relevant to the present study: agent-based social simulation, LLM-driven multi-agent systems, and reflective cognitive updating. The present work contributes by integrating these strands into a time-aware framework designed specifically for public emergencies and by evaluating the resulting system across multiple real cases.
+
+\section{Method}
+This section introduces the proposed time-aware multi-agent public opinion simulation framework. The framework is designed to capture the interaction among temporal event progression, individual cognitive-behavioral change, and the information environment of the platform. Rather than treating public opinion as a sequence of isolated text-generation steps, the proposed system models public discussion as a dynamic process in which users enter asynchronously, consume partial information, act under evolving psychological states, and respond to official communication embedded in the event timeline.
+
+\subsection{Overall Framework}
+The proposed framework consists of three tightly connected layers: a time-aware scheduling layer, an individual cognitive-behavioral layer, and an environmental simulation layer. The time-aware scheduling layer determines when agents enter the system and when event developments or official releases become active. The individual layer governs how each user perceives available information, chooses whether to interact, generates content, and updates internal psychological variables. The environmental layer stores posts, replies, and event-level signals, and controls what information becomes visible to agents at different moments.
+
+These three layers operate within a unified simulation loop. A triggering event initiates public attention, after which agents enter according to the evolving temporal intensity of the case. Once inside the system, agents browse visible content, decide whether to like, comment, repost, or exit, and then undergo a reflection step that updates emotion and confidence. Meanwhile, official publishers inject authoritative information at scheduled times derived from real event timelines. Through this process, the framework seeks to approximate not only what users say, but also when they appear, what they see, why they respond, and how their later behavior is altered by prior interaction.
+
+\subsection{Time-Aware Scheduling Mechanism}
+A key design choice of the framework is the use of continuous-time scheduling rather than fixed synchronous rounds. Real social-media participation is fundamentally asynchronous: users join at different times, react with different delays, and are exposed to different information states depending on when they enter the discussion. To reflect this property, the framework uses an event-priority queue in which each agent is associated with a next execution time. This design allows the simulation to maintain temporal ordering across user actions, official releases, and event-development nodes.
+
+Agent entry follows a time-dependent probability distribution,
+\[
+P(t) \propto t^{\alpha} e^{-\beta t}, \quad t \geq 0,
+\]
+where $\alpha$ controls the initial growth of public attention and $\beta$ determines the rate of decay. This formulation approximates the common lifecycle of online public attention, in which engagement increases rapidly after the onset of a crisis and then gradually declines. Because the system preserves execution order, comments produced at time $t$ may influence users who arrive at time $t+\Delta t$, thereby allowing later participants to react to an evolving discussion rather than a static snapshot.
+
+The temporal layer also includes event-progress nodes that can reactivate attention during later stages. In practical terms, this means that time in the proposed framework is not simply an index for computation; it is a substantive mechanism variable that shapes the rhythm of information exposure, the clustering of interaction, and the timing of emotional reinforcement or relief.
+
+\subsection{Individual Cognitive-Behavioral Simulation}
+Each simulated user is initialized with relatively stable profile attributes together with dynamic psychological variables. The framework tracks emotion intensity $e \in [0,1]$, social confidence $c \in [0,1]$, and sentiment polarity $s \in [-1,1]$. These variables are not treated as fixed labels; instead, they evolve as agents interact with the information environment and reflect on prior experience.
+
+Within each interaction cycle, an agent proceeds through four stages. First, the agent perceives a subset of currently visible comments and event information. Second, based on its profile, internal state, and observed content, the agent decides whether to like, reply, comment, repost, or leave the platform. Third, if a substantive action is taken, the LLM generates semantically rich content conditioned on the user profile, contextual information, and accumulated interaction history. Fourth, the system invokes a reflection step, during which the agent updates psychological variables by interpreting previous exposure and action outcomes.
+
+This design allows the framework to capture a closed loop of observation, expression, and feedback. In contrast to simple diffusion models, the agent does not merely transmit a state. It interprets incoming information, expresses a situated response, and then re-enters the public discussion with an altered internal configuration. This mechanism is especially important in crisis settings, where repeated exposure to official announcements or emotionally charged commentary can amplify or attenuate later responses.
+
+\subsection{Environmental Simulation and Official Publishers}
+The platform environment is implemented as a centralized interaction space containing the event topic, visible comments, and reply structures. Agents do not observe the full environment directly; instead, they receive a filtered subset of currently available information. This limited visibility more closely reflects how users encounter platform content in practice and ensures that the information structure itself influences downstream interaction.
+
+A distinctive feature of the framework is the explicit modeling of official publishers. Official publishers are not treated as ordinary users. They release authoritative messages at pre-specified time points extracted from each real event timeline, and their posts serve as structured interventions in the simulated opinion process. The number, content, and timing of these releases vary across cases in order to preserve the institutional features of each event. By embedding official communication into the same timeline as user activity, the framework can analyze whether and how institutional intervention alters emotional trajectories and trend alignment.
+
+The environment also supports event-progress activation and attention reallocation. When major developments occur, the system can raise participation intensity and thereby produce renewed bursts of activity. As a result, the environment does not simply store interaction outcomes; it also participates in shaping the conditions under which new interaction becomes likely.
+
+\subsection{Recording and Rollback}
+Because the goal of the framework is analytical as well as generative, the system includes persistent logging and rollback mechanisms. It records content, action times, variable changes, and aggregate trajectories so that simulation runs can be inspected after execution. In addition, the rollback capability enables counterfactual continuation from designated time points under alternative settings. This design is important for mechanism analysis because it allows researchers to compare how different intervention choices alter the same underlying event trajectory.
+
+\section{Experiments}
+
+\subsection{Research Questions}
+The empirical study is designed to answer three research questions.
+\begin{itemize}
+    \item \textbf{RQ1:} Can the proposed framework reproduce real public-opinion trajectories more faithfully than comparison settings, especially when official publishers and event-progress signals are included?
+    \item \textbf{RQ2:} How does the reflection module affect sentiment fidelity and the stability of the simulated public-opinion process?
+    \item \textbf{RQ3:} How do users respond to official-release events across crises with different emotional intensity and institutional characteristics?
+\end{itemize}
+
+\subsection{Cases and Data Sources}
+We evaluate the framework on three real public-emergency cases: the China Eastern MU5735 crash, the Guangzhou BMW crash incident, and the Cathay Pacific discrimination incident. For each case, real-world public-opinion data are constructed from social-media text and timestamp information and then aggregated at a unified temporal granularity so that simulated trajectories can be compared with observed series. These cases differ meaningfully in severity, emotional intensity, and the character of institutional response, which makes them suitable for testing whether the framework generalizes beyond a single event type.
+
+\subsection{Experimental Settings}
+To preserve interpretability, the experiments follow a fixed-base-parameter and single-mechanism-switch strategy. The time horizon, baseline behavioral parameters, event-node structure, and general simulation setup are held constant within each comparison, while only the mechanism relevant to the target question is changed. This strategy reduces confounding and makes the role of each component easier to interpret.
+
+For RQ1, the main comparison is between settings without official publishers and settings that include fixed official publishers together with multiple event-progress signals. For RQ2, the central manipulation is whether the reflection module is enabled. For RQ3, the analysis focuses on before-and-after changes surrounding official releases. To maintain cross-case comparability, the same grouping logic is used across all three events. Table~\ref{tab:experiment_groups} summarizes the experimental configurations.
+
+\input{tables/tab_experiment_groups}
+
+\subsection{Evaluation Metrics}
+Following prior work on LLM-based social simulation, we evaluate the agreement between simulated and real sentiment trajectories from four complementary perspectives. First, $\Delta\mathrm{Bias}$ measures the absolute difference between the mean sentiment levels of the simulated series $Y$ and the real series $X$:
+\[
+\Delta\mathrm{Bias} = |\mathrm{mean}(Y) - \mathrm{mean}(X)|.
+\]
+Second, $\Delta\mathrm{Div}$ measures the variance of the hourly difference series,
+\[
+\Delta\mathrm{Div} = \mathrm{Var}(Y_i - X_i),
+\]
+which reflects the temporal instability of the mismatch. Third, Pearson correlation (Corr) captures the similarity of overall trend direction. Fourth, normalized dynamic time warping ($\mathrm{DTW}_{\mathrm{norm}}$) measures shape similarity after min--max normalization and temporal alignment. Taken together, these indicators assess level bias, fluctuation stability, trend consistency, and trajectory-shape similarity.
+
+\section{Results and Discussion}
+
+\subsection{Multi-Case Sentiment Validation (RQ1)}
+Tables~\ref{tab:guangzhou_metrics}--\ref{tab:cathay_metrics} report the main sentiment-validation results for the Guangzhou BMW case, the MU5735 case, and the Cathay Pacific case, respectively.
+
+\input{tables/tab_guangzhou_metrics}
+\input{tables/tab_mu5735_metrics}
+\input{tables/tab_cathay_metrics}
+
+Across all three cases, the framework exhibits relatively stable performance in temporal alignment, while the difficulty of reproducing absolute sentiment level varies substantially by event type. In the Guangzhou BMW case, the complete model achieves $\Delta\mathrm{Bias}=0.107$, and the 7-day setting further reduces the bias to 0.064, indicating close agreement with the real sentiment level. In the Cathay Pacific case, the complete model reaches a moderate bias of 0.291, while the 300-agent condition improves this value to 0.206. By contrast, the MU5735 case remains substantially more difficult, with the complete model producing $\Delta\mathrm{Bias}=0.754$. This pattern suggests that events characterized by extreme grief and tragedy are harder to match at the level of sentiment magnitude even when the general emotional direction is reproduced.
+
+At the same time, the framework maintains relatively low $\Delta\mathrm{Div}$ and comparatively stable $\mathrm{DTW}_{\mathrm{norm}}$ values across settings. This indicates that even when the exact sentiment level is imperfect, the framework still captures coarse temporal shape and fluctuation stability with reasonable consistency. Pearson correlation values are more modest, implying that fine-grained short-term oscillations remain difficult to recover. A plausible explanation is that the current system does not explicitly model recommendation algorithms, exogenous traffic shocks, or platform hot-search mechanisms, all of which may affect short-horizon variation in real public opinion.
+
+\subsection{Cross-Case Comparison and Scale Effects (RQ1)}
+To further examine generalization, Table~\ref{tab:cross_case_g1} compares the complete model across the three cases. Table~\ref{tab:scale_effect} reports the effect of increasing agent scale from 100 to 300, and Table~\ref{tab:time_scale} compares 3-day and 7-day simulation horizons.
+
+\input{tables/tab_cross_case_g1}
+\input{tables/tab_scale_effect}
+\input{tables/tab_time_scale}
+
+The cross-case comparison reveals a clear gradient of simulation difficulty. The Guangzhou BMW case shows the smallest bias, Cathay Pacific occupies an intermediate position, and MU5735 is the most difficult case. This ordering is consistent with the intuition that more emotionally extreme crises are harder to calibrate precisely. Importantly, increasing the number of agents from 100 to 300 improves $\Delta\mathrm{Bias}$ in all three cases. The improvements are 33\% for Guangzhou BMW, 29\% for Cathay Pacific, and 9\% for MU5735. These findings suggest that the framework benefits from scale and that a larger simulated population can better approximate aggregate sentiment distributions.
+
+The effect of simulation horizon is more case-dependent. In the Guangzhou BMW and MU5735 cases, the 7-day setting improves $\Delta\mathrm{Bias}$ relative to the 3-day configuration, implying that a longer interaction window allows the cumulative effects of exposure and reflection to be expressed more fully. In the Cathay Pacific case, however, the longer horizon performs worse, likely because the real online discussion decays more quickly after the initial surge, making an extended simulated tail less consistent with observed behavior. This result highlights that time scale is not a purely technical parameter; it is also part of the substantive event model.
+
+\subsection{Ablation Analysis (RQ2)}
+Tables~\ref{tab:reflection_ablation} and~\ref{tab:publisher_ablation} present the reflection and official-publisher ablation results, while Table~\ref{tab:ablation_summary} summarizes the direction of their effects.
+
+\input{tables/tab_reflection_ablation}
+\input{tables/tab_publisher_ablation}
+\input{tables/tab_ablation_summary}
+
+The ablation results indicate pronounced heterogeneity across cases. In the Guangzhou BMW case, removing the reflection module worsens $\Delta\mathrm{Bias}$ from 0.107 to 0.582, representing a substantial decline in fidelity. This suggests that reflection is essential for maintaining a realistic emotional trajectory in events where user responses continue to evolve as more information becomes available. Without reflection, emotion intensity and social confidence remain insufficiently adaptive, and generated sentiment drifts toward a flatter pattern.
+
+In the MU5735 and Cathay Pacific cases, disabling reflection reduces the observed bias. This should not be interpreted as evidence that reflection is unhelpful. Rather, it suggests that the present reflection design may amplify negative affect or evaluative consistency beyond the level that is optimally calibrated for these cases. In other words, the mechanism appears to move the simulation in a behaviorally meaningful direction, but its intensity is not yet uniformly calibrated across crises with different emotional baselines.
+
+The official-publisher ablation yields a similarly case-dependent pattern. In the Guangzhou BMW and Cathay Pacific cases, removing official publishers worsens simulation bias, indicating that authoritative information acts as a useful anchor that brings the simulated trajectory closer to reality. In the MU5735 case, however, removing official publishers lowers the bias. One plausible interpretation is that official releases in extremely tragic events function as strong emotional catalysts; they intensify negative sentiment in a way that is qualitatively correct, but because the model still undershoots the real emotional extreme, the additional push can increase quantitative mismatch.
+
+Overall, the ablation study yields three substantive conclusions. First, the Guangzhou BMW case most clearly demonstrates the intended value of the full framework, because both reflection and official publishers improve fidelity. Second, the MU5735 case exposes a current limitation of LLM-based public-opinion simulation in extremely tragic scenarios, namely an emotional-calibration ceiling. Third, the Cathay Pacific case suggests that official intervention behaves as expected, while reflection remains sensitive to the particular affective structure of the event.
+
+\subsection{Responses to Official Publisher Events (RQ3)}
+Beyond aggregate metric comparison, the results also illuminate how official communication operates differently across the three crises. In the Guangzhou BMW case, the initial official police report appears to act as an emotional catalyst, sharply increasing attention and moving discussion into a more strongly negative regime. Later judicial updates generate temporary emotional relief, but that relief is subsequently offset by renewed reflection and moral evaluation. In the MU5735 case, official releases mainly deepen and sustain collective grief rather than relieving it. Agents repeatedly internalize the seriousness of the event after each update, yielding a pattern of release, deepening, stabilization, and renewed deepening. In the Cathay Pacific case, apologies and follow-up measures have a weaker calming effect, suggesting that corporate responses may carry lower perceived legitimacy or trust than formal institutional announcements.
+
+This cross-case comparison highlights two broader factors. The first is information type: factual confirmation tends to intensify emotional engagement, whereas accountability-oriented or resolution-oriented communication is more likely to regulate emotion. The second is event severity: the more severe the crisis, the more difficult it becomes for official intervention to generate visible emotional relief. These findings are broadly consistent with expectations from crisis communication research and suggest that the proposed framework can be used to examine not only whether public opinion changes, but also why similar interventions produce different outcomes across events.
+
+\subsection{Overall Metric Summary}
+For completeness, Table~\ref{tab:all_configs} summarizes the core metrics across cases and experimental configurations.
+
+\input{tables/tab_all_configs}
+
+The full set of results reinforces the central conclusion of this study: the proposed framework is best understood as a mechanism-sensitive simulation system. Its value lies not only in generating plausible text, but also in enabling structured comparison across intervention settings, case types, and temporal horizons.
+
+\section{Conclusion}
+This paper presented a time-aware LLM-driven multi-agent simulation framework for modeling public opinion during public emergencies. By combining continuous-time scheduling, official publisher injection, and a cognitive reflection mechanism, the framework moves beyond a purely diffusion-oriented view of online discussion and instead models public opinion as a temporally structured process shaped jointly by users, institutions, and the platform environment.
+
+Empirical evaluation on three real cases demonstrates several key findings. First, the framework can stably reproduce coarse temporal patterns across heterogeneous events, although exact sentiment-level calibration remains more challenging in highly tragic scenarios. Second, increasing the number of agents generally improves simulation fidelity, suggesting that the framework scales in a meaningful way. Third, both reflection and official communication contribute to simulation quality, but their effects are moderated by event type, emotional intensity, and the role played by institutional intervention in the real case.
+
+The study contributes to the literature in two respects. Methodologically, it offers a public-opinion simulation architecture that is temporally grounded, behaviorally interpretable, and suitable for ablation-based mechanism analysis. Substantively, it provides empirical evidence that official information release and reflective user updating are not peripheral details, but central determinants of how simulated crisis discussion evolves. More broadly, the framework positions LLM-based simulation as a tool for explanatory analysis and counterfactual experimentation in crisis communication research.
+
+Several limitations should also be acknowledged. The present framework does not yet explicitly model recommendation systems, exogenous media shocks, or fine-grained trust dynamics, and these omissions likely constrain performance on short-term fluctuations. In addition, the reflection mechanism appears to require more careful calibration in events characterized by extreme or mixed emotional structures. Future work can therefore extend the model by incorporating richer platform mechanisms, improving emotional calibration, and expanding evaluation to a broader range of public emergencies.
+
+\bibliographystyle{plainnat}
+\bibliography{refs/references}
+
+\end{document}
