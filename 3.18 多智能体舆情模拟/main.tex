@@ -1,3 +1,6 @@
+% Main manuscript entry point for this paper workspace.
+% Write each chapter under sections/ and compile this file.
+
 \documentclass[11pt]{article}
 
 \usepackage[a4paper,margin=1in]{geometry}
@@ -20,6 +23,14 @@
 \title{Time-Aware Multi-Agent Public Opinion Simulation for Public Emergencies}
 \author{Author information to be added}
 \date{}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+
+\graphicspath{{figures/}}
+
+\title{Time-Aware Multi-Agent Public Opinion Simulation for Public Emergencies}
+\author{Author information to be added}
+\date{\today}
 
 \begin{document}
 
@@ -187,6 +198,13 @@ Empirical evaluation on three real cases demonstrates several key findings. Firs
 The study contributes to the literature in two respects. Methodologically, it offers a public-opinion simulation architecture that is temporally grounded, behaviorally interpretable, and suitable for ablation-based mechanism analysis. Substantively, it provides empirical evidence that official information release and reflective user updating are not peripheral details, but central determinants of how simulated crisis discussion evolves. More broadly, the framework positions LLM-based simulation as a tool for explanatory analysis and counterfactual experimentation in crisis communication research.
 
 Several limitations should also be acknowledged. The present framework does not yet explicitly model recommendation systems, exogenous media shocks, or fine-grained trust dynamics, and these omissions likely constrain performance on short-term fluctuations. In addition, the reflection mechanism appears to require more careful calibration in events characterized by extreme or mixed emotional structures. Future work can therefore extend the model by incorporating richer platform mechanisms, improving emotional calibration, and expanding evaluation to a broader range of public emergencies.
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/method}
+\input{sections/experiments}
+\input{sections/results_analysis}
+\input{sections/conclusion}
 
 \bibliographystyle{plainnat}
 \bibliography{refs/references}
